@@ -30,7 +30,7 @@ public class GameActivity extends AppCompatActivity {
 
         initializeGravitySensor();
 
-        gameView = new GameView(this, screenSize.x, screenSize.y);
+        gameView = new GameView(this, screenSize.x, screenSize.y, "level1");
 
         setContentView(gameView);
     }
