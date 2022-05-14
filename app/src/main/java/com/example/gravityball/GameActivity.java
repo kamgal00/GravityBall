@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -30,9 +31,15 @@ public class GameActivity extends AppCompatActivity {
 
         initializeGravitySensor();
 
-        gameView = new GameView(this, screenSize.x, screenSize.y, "level1");
+        String levelName = loadLevelName();
+
+        gameView = new GameView(this, screenSize.x, screenSize.y, levelName);
 
         setContentView(gameView);
+    }
+    private String loadLevelName(){
+        Intent intent = getIntent();
+        return intent.getStringExtra("levelName");
     }
 
     private void initializeGravitySensor() {

@@ -49,8 +49,6 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
 
         gameDrawer = new GameDrawer(gameWorld, scaleCalculator, getResources());
 
-        gameDrawer.prepareStaticObjects();
-
     }
 
     @NonNull

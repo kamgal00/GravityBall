@@ -50,6 +50,8 @@ public class GameDrawer {
         getBitmaps(resources);
 
         fullScreenRect = new Rect(0,0,scaleCalculator.deviceScreenX, scaleCalculator.deviceScreenY);
+
+        prepareStaticObjects();
     }
 
     private void getBitmaps(Resources resources) {
@@ -69,7 +71,7 @@ public class GameDrawer {
         wallPaint.setColor(Color.rgb(255, 255, 153));
     }
 
-    public void prepareStaticObjects(){
+    private void prepareStaticObjects(){
         walls = new ArrayList<>();
         for(Pair<Vec2, Vec2> wall : gameWorld.walls)
             walls.add(scaleCalculator.virtualRectangleToRect(wall));
