@@ -48,6 +48,7 @@ public class GravityBallServer {
 
     public static synchronized void destroy(){
         if(instance != null) {
+//            throw new RuntimeException();
             instance.close();
             instance=null;
         }

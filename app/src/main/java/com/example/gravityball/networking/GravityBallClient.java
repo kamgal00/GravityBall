@@ -44,6 +44,7 @@ public class GravityBallClient {
 
     public static void destroy(){
         if(instance != null) {
+//            throw new RuntimeException();
             instance.close();
             instance=null;
         }

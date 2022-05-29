@@ -156,7 +156,7 @@ public enum GameState implements EventHandler{
     GAME_OWNER{
         @Override
         public void connected(Connection c) {
-            c.close();
+//            c.close();
         }
 
         @Override
@@ -197,7 +197,7 @@ public enum GameState implements EventHandler{
     GAME_CLIENT{
         @Override
         public void connected(Connection c) {
-            c.close();
+//            c.close();
         }
 
         @Override

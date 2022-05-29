@@ -17,6 +17,8 @@ public class Network {
         kryo.register(ServerUpdate.class);
         kryo.register(ClientUpdate.class);
         kryo.register(Vec2.class);
+        kryo.register(ArrayList.class);
+        kryo.register(Float.class);
     }
     public static class EnterLobby{}
     public static class EnterGame{
