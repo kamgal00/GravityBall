@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.util.Log;
 import android.util.Pair;
 
 import com.example.gravityball.R;
@@ -20,6 +21,7 @@ import com.example.gravityball.world.GameWorld;
 import org.jbox2d.common.Vec2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class GameDrawer {
     public final GameWorld gameWorld;
@@ -31,17 +33,20 @@ public class GameDrawer {
     Rect treasurePos;
     Rect fullScreenRect;
 
-    private Vec2 mainBallPosition;
+//    private Vec2 mainBallPosition;
+    private final int mainBallId;
     private int mainBallRadiusInPixels;
-    Matrix ballTransposition = new Matrix();
+//    Matrix ballTransposition = new Matrix();
+    private final ArrayList<Matrix> ballTranspositions;
 
-    Bitmap ballBitmap, treasureBitmap, endBitmap;
+    Bitmap ballBitmap, treasureBitmap, endBitmap, enemyBitmap;
 
     private Paint backgroundPaint;
     private Paint obstaclePaint;
     private Paint wallPaint;
+    private Paint otherPlayersPaint;
 
-    public GameDrawer(GameWorld gameWorld, ScaleCalculator scaleCalculator, Resources resources) {
+    public GameDrawer(GameWorld gameWorld, ScaleCalculator scaleCalculator, Resources resources, int players, int playerId) {
         this.gameWorld = gameWorld;
         this.scaleCalculator = scaleCalculator;
 
@@ -52,12 +57,17 @@ public class GameDrawer {
         fullScreenRect = new Rect(0,0,scaleCalculator.deviceScreenX, scaleCalculator.deviceScreenY);
 
         prepareStaticObjects();
+
+        mainBallId = playerId;
+        ballTranspositions =new ArrayList<>(Arrays.asList(new Matrix[players]));
+        for(int i=0;i<ballTranspositions.size();i++ ) ballTranspositions.set(i, new Matrix());
     }
 
     private void getBitmaps(Resources resources) {
         ballBitmap = BitmapFactory.decodeResource(resources, R.drawable.ball);
         treasureBitmap = BitmapFactory.decodeResource(resources, R.drawable.cheese);
         endBitmap = BitmapFactory.decodeResource(resources, R.drawable.youwin);
+        enemyBitmap = BitmapFactory.decodeResource(resources, R.drawable.enemy);
     }
 
     private void preparePaints() {
@@ -69,6 +79,9 @@ public class GameDrawer {
 
         wallPaint = new Paint();
         wallPaint.setColor(Color.rgb(255, 255, 153));
+
+        otherPlayersPaint = new Paint();
+        otherPlayersPaint.setColor(Color.BLUE);
     }
 
     private void prepareStaticObjects(){
@@ -86,6 +99,9 @@ public class GameDrawer {
 
         ballBitmap = Bitmap.createScaledBitmap(ballBitmap, 2* mainBallRadiusInPixels, 2* mainBallRadiusInPixels, false);
         ballBitmap = ImageUtils.getCroppedBitmap(ballBitmap);
+
+        enemyBitmap = Bitmap.createScaledBitmap(enemyBitmap, 2* mainBallRadiusInPixels, 2* mainBallRadiusInPixels, false);
+        enemyBitmap = ImageUtils.getCroppedBitmap(enemyBitmap);
     }
 
 
@@ -98,15 +114,31 @@ public class GameDrawer {
             return;
         }
 
-        getBallScreenPosition();
+//        getBallScreenPosition();
 
         drawGameObjects(canvas);
 
         disco.makeDisco(canvas, fullScreenRect);
     }
 
+    public void update(){
+        getBallScreenPosition();
+    }
+
     private void drawGameObjects(Canvas canvas) {
-        canvas.drawBitmap(ballBitmap, ballTransposition, null);
+//        canvas.drawBitmap(ballBitmap, ballTransposition, null);
+        for(int i=0;i<ballTranspositions.size();i++) {
+            if(i!= mainBallId) {
+//                float[] values = new float[9];
+//                ballTranspositions.get(i).getValues(values);
+//                float x = values[Matrix.MTRANS_X];
+//                float y = values[Matrix.MTRANS_Y];
+//                canvas.drawCircle(x +ballBitmap.getWidth()/2,y+ballBitmap.getHeight()/2, mainBallRadiusInPixels, otherPlayersPaint );
+                canvas.drawBitmap(enemyBitmap, ballTranspositions.get(i), null);
+            }
+        }
+
+        canvas.drawBitmap(ballBitmap, ballTranspositions.get(mainBallId), null);
 
         for(Rect r : obstacles) {
             canvas.drawRect(r, obstaclePaint);
@@ -121,13 +153,17 @@ public class GameDrawer {
 
 
     private void getBallScreenPosition() {
-        mainBallPosition = gameWorld.mainBall.getPosition();
-        scaleCalculator.virtualPositionToPixels(mainBallPosition);
-        calculateBallTransposition();
+        for(int i=0;i<ballTranspositions.size();i++) {
+            Vec2 newPosition = new Vec2(gameWorld.positions.get(i));
+            if(newPosition.x== Float.POSITIVE_INFINITY || newPosition.x == Float.NEGATIVE_INFINITY)
+                return;
+            scaleCalculator.virtualPositionToPixels(newPosition);
+            calculateBallTransposition(newPosition, i);
+        }
     }
 
-    private void calculateBallTransposition() {
-        ballTransposition.setRotate(-gameWorld.mainBall.getAngle()/((float)Math.PI*2)*360, ballBitmap.getWidth()/2, ballBitmap.getHeight()/2);
-        ballTransposition.postTranslate(mainBallPosition.x- mainBallRadiusInPixels, mainBallPosition.y- mainBallRadiusInPixels);
+    private void calculateBallTransposition(Vec2 position, int id) {
+        ballTranspositions.get(id).setRotate(-gameWorld.angles.get(id)/((float)Math.PI*2)*360, ballBitmap.getWidth()/2, ballBitmap.getHeight()/2);
+        ballTranspositions.get(id).postTranslate(position.x- mainBallRadiusInPixels, position.y- mainBallRadiusInPixels);
     }
 }

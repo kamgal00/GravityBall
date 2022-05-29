@@ -9,6 +9,10 @@ import java.util.Collections;
 import java.util.Vector;
 
 public class Disco {
+    private long previous = System.currentTimeMillis();
+    private long lag = 0;
+    private long MS_PER_CHANGE = 500;
+
     int turn = 8, counter = 0;
     Paint blue = new Paint(), red = new Paint(), yellow = new Paint(), green = new Paint();
     Vector<Paint> colors = new Vector<>();
@@ -30,14 +34,24 @@ public class Disco {
 
     public void makeDisco(Canvas c, Rect r) {
         c.drawRect(r, currPaint);
-        counter++;
-        if(counter >= turn) {
-            counter = 0;
-            prevPaint = currPaint;
-            while(prevPaint == currPaint) {
-                Collections.shuffle(colors);
-                currPaint = colors.get(0);
-            }
+
+        long current = System.currentTimeMillis();
+        double elapsed = current - previous;
+        previous = current;
+        lag += elapsed;
+
+        while (lag >= MS_PER_CHANGE)
+        {
+            changeColor();
+            lag -= MS_PER_CHANGE;
+        }
+    }
+
+    private void changeColor() {
+        prevPaint = currPaint;
+        while(prevPaint == currPaint) {
+            Collections.shuffle(colors);
+            currPaint = colors.get(0);
         }
     }
 

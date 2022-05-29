@@ -16,4 +16,23 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/JoinMultiplayer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join Multiplayer"
+        app:layout_constraintEnd_toEndOf="@+id/button"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toStartOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/button" />
+
+    <Button
+        android:id="@+id/CreateLobby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create Lobby"
+        app:layout_constraintEnd_toEndOf="@+id/JoinMultiplayer"
+        app:layout_constraintStart_toStartOf="@+id/JoinMultiplayer"
+        app:layout_constraintTop_toBottomOf="@+id/JoinMultiplayer" />
 </androidx.constraintlayout.widget.ConstraintLayout>

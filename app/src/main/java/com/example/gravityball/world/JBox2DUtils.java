@@ -25,7 +25,13 @@ public class JBox2DUtils {
 
         PolygonShape s = new PolygonShape();
         s.setAsBox((bottomRight.x-topLeft.x)/2, (topLeft.y-bottomRight.y)/2);
-        body.createFixture(s, 0.0f);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = s;
+        fixtureDef.density = 0.0f;
+        fixtureDef.filter.categoryBits = 1;
+        fixtureDef.filter.maskBits = 2;
+        body.createFixture(fixtureDef);
 
         return body;
     }
@@ -45,6 +51,8 @@ public class JBox2DUtils {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.9f;
         fixtureDef.restitution = 0.3f;
+        fixtureDef.filter.categoryBits = 2;
+        fixtureDef.filter.maskBits=1;
 
         body.createFixture(fixtureDef);
         return body;

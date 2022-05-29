@@ -8,6 +8,9 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.example.gravityball.state.GameState;
+import com.example.gravityball.state.StateManager;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -54,8 +57,16 @@ public class SelectLevelActivity extends AppCompatActivity {
     }
 
     private void startGame(String name) {
-        Intent intent = new Intent(getApplicationContext(), GameActivity.class);
-        intent.putExtra("levelName", name);
-        startActivity(intent);
+        StateManager.getInstance().setLevelName(name);
+        if(StateManager.getInstance().isCreatingLobby()) {
+            StateManager.getInstance().changeState(GameState.LOBBY_OWNER);
+        }
+        else {
+            Intent intent = new Intent(getApplicationContext(), GameActivity.class);
+            StateManager.getInstance().setPlayerId(0);
+            StateManager.getInstance().setPlayers(1);
+            startActivity(intent);
+        }
+
     }
 }

@@ -4,6 +4,8 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
+import com.example.gravityball.networking.Network;
+
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
@@ -18,38 +20,66 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class GameWorld {
     public final World world;
     public final JBox2DUtils worldUtils;
-    public Body mainBall, treasure;
+//    public Body mainBall, treasure;
+    public Body treasure;
+    public final ArrayList<Body> balls;
+    public ArrayList<Vec2> forces, positions, velocities;
+    public ArrayList<Float> angles, angularVelocities;
 
     public final ArrayList<Pair<Vec2, Vec2>> walls = new ArrayList<>();
     public final ArrayList<Pair<Vec2, Vec2>> obstacles = new ArrayList<>();
     public Pair<Vec2, Vec2> treasurePosition;
     public final HashMap<Body, Vec2> obstaclesToTeleports = new HashMap<>();
 
-    private Vec2 teleport = null;
+    private HashMap<Body, Vec2> teleports = new HashMap<>();
+    private final boolean triggersEnabled;
 
     public boolean isEnd = false;
+    public int winnerBall=-1;
 
     public final float worldWidth, worldHeight;
     public final float ballRadius;
     public final int velocityIterations = 4;
     public final int positionIterations = 1;
 
-    public GameWorld(float ballRadius, Vec2 initialBallPosition, float worldWidth, float worldHeight) {
+    public GameWorld(float ballRadius, Vec2 initialBallPosition, float worldWidth, float worldHeight, int ballsNumber, boolean triggers) {
         this.ballRadius = ballRadius;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
+
+        triggersEnabled = triggers;
 
         world = initializeWorld();
         worldUtils = new JBox2DUtils(world, ballRadius);
 
         initializeBorders(worldWidth, worldHeight);
 
-        mainBall = worldUtils.createBall(initialBallPosition);
+        balls = new ArrayList<>(Arrays.asList(new Body[ballsNumber]));
+        forces = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
+        velocities = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
+        positions = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
+        angles = new ArrayList<>(Arrays.asList(new Float[ballsNumber]));
+        angularVelocities = new ArrayList<>(Arrays.asList(new Float[ballsNumber]));
+
+        for(int i=0;i<ballsNumber;i++) {
+            balls.set(i, worldUtils.createBall(initialBallPosition));
+            forces.set(i, new Vec2(0,0));
+            velocities.set(i, new Vec2(0,0));
+            positions.set(i, initialBallPosition);
+            angles.set(i, 0f);
+            angularVelocities.set(i, 0f);
+
+            teleports.put(balls.get(i), null);
+        }
+
+
+//        mainBall = worldUtils.createBall(initialBallPosition);
     }
 
     @NonNull
@@ -57,7 +87,7 @@ public class GameWorld {
         final World world;
         Vec2 gravity = new Vec2(0, 0);
         world = new World(gravity);
-        world.setContactListener(new WorldContactListener());
+        if(triggersEnabled) world.setContactListener(new WorldContactListener());
         return world;
     }
 
@@ -85,18 +115,55 @@ public class GameWorld {
         obstaclesToTeleports.put(b, newPos);
     }
 
-    public void step(Vec2 ballForce, float time) {
+    public void step(float time) {
         applyTeleportation();
-        mainBall.applyForceToCenter(ballForce.mul(mainBall.getMass()));
+        for(int i=0;i<balls.size();i++) {
+            balls.get(i).applyForceToCenter(forces.get(i).mul(balls.get(i).getMass()).mul(0.1f));
+        }
+//        mainBall.applyForceToCenter(ballForce.mul(mainBall.getMass()).mul(0.1f));
         world.step(time, velocityIterations, positionIterations);
+        loadParams();
     }
 
     private void applyTeleportation() {
-        if(teleport != null) {
-            world.destroyBody(mainBall);
-            mainBall = worldUtils.createBall(teleport);
-            teleport=null;
+        for(int i = 0; i<balls.size();i++) {
+            if(teleports.get(balls.get(i)) != null) {
+                Vec2 teleport = teleports.get(balls.get(i));
+                teleports.remove(balls.get(i));
+                world.destroyBody(balls.get(i));
+                balls.set(i, worldUtils.createBall(teleport));
+                teleports.put(balls.get(i), null);
+            }
         }
+
+    }
+
+    public void adjust(Network.ServerUpdate u) {
+        for(int i=0;i<balls.size();i++) {
+            balls.get(i).setTransform(u.positions.get(i), u.angles.get(i));
+            balls.get(i).setLinearVelocity(u.velocities.get(i));
+            balls.get(i).setAngularVelocity(u.angles.get(i));
+            balls.get(i).setAngularVelocity(u.angularVelocities.get(i));
+        }
+    }
+
+    public void loadParams(){
+        for(int i=0;i<balls.size();i++) {
+            Body ball = balls.get(i);
+            positions.set(i, ball.getPosition());
+            velocities.set(i, ball.getLinearVelocity());
+            angles.set(i, ball.getAngle());
+            angularVelocities.set(i, ball.getAngularVelocity());
+        }
+    }
+    public Network.ServerUpdate createServerUpdate(){
+        Network.ServerUpdate out = new Network.ServerUpdate();
+        out.angles = angles;
+        out.forces = forces;
+        out.angularVelocities = angularVelocities;
+        out.positions = positions;
+        out.velocities = velocities;
+        return out;
     }
 
     private class WorldContactListener implements ContactListener {
@@ -104,20 +171,24 @@ public class GameWorld {
         @Override
         public void beginContact(Contact contact) {
             if(ballTouchedObstacle(contact)) {
-                teleport = obstaclesToTeleports.get(contact.m_fixtureA.m_body);
+                teleports.put(
+                        contact.m_fixtureB.m_body,
+                        obstaclesToTeleports.get(contact.m_fixtureA.m_body)
+                );
             }
             if(ballTouchedTreasure(contact)) {
                 isEnd = true;
+                winnerBall = balls.indexOf(contact.m_fixtureB.m_body);
             }
         }
 
         private boolean ballTouchedTreasure(Contact contact) {
-            return contact.m_fixtureB.m_body == mainBall
+            return balls.contains(contact.m_fixtureB.m_body)
                             && contact.m_fixtureA.m_body == treasure;
         }
 
         private boolean ballTouchedObstacle(Contact contact) {
-            return contact.m_fixtureB.m_body == mainBall
+            return  balls.contains(contact.m_fixtureB.m_body)
                             &&  obstaclesToTeleports.containsKey(contact.m_fixtureA.m_body);
         }
 

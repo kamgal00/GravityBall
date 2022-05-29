@@ -18,11 +18,11 @@ public class GameBuilder {
 
     private GameBuilder(){}
 
-    public static GameWorld buildFromJSON(Resources resources, String name) throws JSONException {
+    public static GameWorld buildFromJSON(Resources resources, String name, int ballsNumber, boolean triggers) throws JSONException {
         String json = getJSONFromName(resources,name);
         JSONObject obj = new JSONObject(json);
 
-        GameWorld gameWorld = initializeWorld(obj);
+        GameWorld gameWorld = initializeWorld(obj,ballsNumber, triggers );
 
         loadObjects(obj, gameWorld);
 
@@ -30,7 +30,7 @@ public class GameBuilder {
     }
 
     @NonNull
-    private static GameWorld initializeWorld(JSONObject obj) throws JSONException {
+    private static GameWorld initializeWorld(JSONObject obj, int ballsNumber, boolean triggers) throws JSONException {
         double worldWidth = obj.getDouble("worldWidth"),
                 worldHeight = obj.getDouble("worldHeight"),
                 ballRadius = obj.getDouble("ballRadius");
@@ -39,7 +39,9 @@ public class GameBuilder {
                 (float) ballRadius,
                 ballPosition,
                 (float) worldWidth,
-                (float) worldHeight
+                (float) worldHeight,
+                ballsNumber,
+                triggers
         );
         return gameWorld;
     }

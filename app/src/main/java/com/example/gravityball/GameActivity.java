@@ -10,8 +10,12 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.example.gravityball.state.GameState;
+import com.example.gravityball.state.StateManager;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -27,6 +31,8 @@ public class GameActivity extends AppCompatActivity {
 
         makeFullscreen();
 
+        preventSleep();
+
         Point screenSize = getScreenSize();
 
         initializeGravitySensor();
@@ -36,10 +42,21 @@ public class GameActivity extends AppCompatActivity {
         gameView = new GameView(this, screenSize.x, screenSize.y, levelName);
 
         setContentView(gameView);
+
+        allowNetworking();
     }
+
+    private void allowNetworking() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+    }
+
+    private void preventSleep() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
     private String loadLevelName(){
-        Intent intent = getIntent();
-        return intent.getStringExtra("levelName");
+        return StateManager.getInstance().getLevelName();
     }
 
     private void initializeGravitySensor() {
@@ -79,5 +96,10 @@ public class GameActivity extends AppCompatActivity {
         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.caram);
         mediaPlayer.setLooping(true);
         mediaPlayer.start();
+    }
+
+    @Override
+    public void onBackPressed(){
+        StateManager.getInstance().changeState(GameState.MAIN);
     }
 }
