@@ -125,8 +125,10 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
             db.userDao().insertAll(lastBest);
         }
         else {
-            lastBest.time = currentTime;
-            db.userDao().update(lastBest);
+            if (lastBest.time > currentTime) {
+                lastBest.time = currentTime;
+                db.userDao().update(lastBest);
+            }
         }
     }
 
