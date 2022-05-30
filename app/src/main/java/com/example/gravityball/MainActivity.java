@@ -12,7 +12,7 @@ import com.example.gravityball.state.GameState;
 import com.example.gravityball.state.StateManager;
 
 public class MainActivity extends AppCompatActivity {
-    Button single, multi, lobby;
+    Button single, multi, lobby, scores;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,10 +23,12 @@ public class MainActivity extends AppCompatActivity {
         single = findViewById(R.id.button);
         multi = findViewById(R.id.JoinMultiplayer);
         lobby = findViewById(R.id.CreateLobby);
+        scores = findViewById(R.id.scoresButton);
 
         single.setOnClickListener(view -> startSingle());
         multi.setOnClickListener(view -> joinMulti());
         lobby.setOnClickListener(view -> createLobby());
+        scores.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, BestTimesActivity.class)));
 
         Log.set(Log.LEVEL_DEBUG);
 

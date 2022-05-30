@@ -13,6 +13,8 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.example.gravityball.database.AppDatabase;
+import com.example.gravityball.database.BestScoreEnt;
 import com.example.gravityball.drawing.GameDrawer;
 import com.example.gravityball.drawing.ScaleCalculator;
 import com.example.gravityball.networking.GravityBallClient;
@@ -33,6 +35,8 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     private Canvas canvas;
     private final GameState gameState;
     private final int players, playerId;
+    private boolean isSaved = false;
+    private final String levelName;
 
     private Thread thread;
     private boolean isPlaying;
@@ -44,6 +48,8 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
 
     public GameView(GameActivity activity, int screenX, int screenY, String levelName) {
         super(activity);
+
+        this.levelName = levelName;
 
         gameState = StateManager.getInstance().getCurrentState();
         players = StateManager.getInstance().getPlayers();
@@ -98,7 +104,29 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
                 lagUpdate-=MS_PER_UPDATE;
             }
 
+            if(isGameFinished() && !isSaved){
+                isSaved=true;
+                saveScore();
+            }
+
             draw();
+        }
+    }
+
+    private void saveScore() {
+        AppDatabase db = AppDatabase.createAppDatabase(getContext());
+        long currentTime = gameWorld.times.get(playerId)-gameWorld.serverStartTime;
+
+        BestScoreEnt lastBest = db.userDao().getById(levelName);
+        if(lastBest ==null) {
+            lastBest = new BestScoreEnt();
+            lastBest.levelName = levelName;
+            lastBest.time = currentTime;
+            db.userDao().insertAll(lastBest);
+        }
+        else {
+            lastBest.time = currentTime;
+            db.userDao().update(lastBest);
         }
     }
 
@@ -145,6 +173,10 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isGameFinished(){
+        return gameWorld.times.get(playerId) != -1;
     }
 
     @Override

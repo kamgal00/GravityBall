@@ -35,4 +35,13 @@
         app:layout_constraintEnd_toEndOf="@+id/JoinMultiplayer"
         app:layout_constraintStart_toStartOf="@+id/JoinMultiplayer"
         app:layout_constraintTop_toBottomOf="@+id/JoinMultiplayer" />
+
+    <Button
+        android:id="@+id/scoresButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BEST RESULTS"
+        app:layout_constraintEnd_toEndOf="@+id/CreateLobby"
+        app:layout_constraintStart_toStartOf="@+id/CreateLobby"
+        app:layout_constraintTop_toBottomOf="@+id/CreateLobby" />
 </androidx.constraintlayout.widget.ConstraintLayout>

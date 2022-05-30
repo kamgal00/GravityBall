@@ -197,12 +197,17 @@ public class GameDrawer {
         ballTranspositions.get(id).postTranslate(position.x- mainBallRadiusInPixels, position.y- mainBallRadiusInPixels);
     }
 
-    private void drawTime(Canvas canvas, long timeInMillis) {
+    public static String millisToString(long timeInMillis) {
         long MI = timeInMillis%1000; timeInMillis/=1000;
         long SS = timeInMillis%60; timeInMillis/=60;
         long MM = timeInMillis;
 
-        String timeInMMSSMI = String.format("%02d:%02d:%03d", MM, SS, MI);
+        return String.format("%02d:%02d:%03d", MM, SS, MI);
+    }
+
+    private void drawTime(Canvas canvas, long timeInMillis) {
+
+        String timeInMMSSMI = millisToString(timeInMillis);
 
         TextPaint p = new TextPaint();
         p.setTextSize(100);
