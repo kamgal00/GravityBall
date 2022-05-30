@@ -26,11 +26,14 @@ import java.util.HashMap;
 public class GameWorld {
     public final World world;
     public final JBox2DUtils worldUtils;
-//    public Body mainBall, treasure;
     public Body treasure;
-    public final ArrayList<Body> balls;
+    public ArrayList<Body> balls;
     public ArrayList<Vec2> forces, positions, velocities;
     public ArrayList<Float> angles, angularVelocities;
+
+    public ArrayList<Long> times;
+    public long startTime;
+    public long serverStartTime;
 
     public final ArrayList<Pair<Vec2, Vec2>> walls = new ArrayList<>();
     public final ArrayList<Pair<Vec2, Vec2>> obstacles = new ArrayList<>();
@@ -39,9 +42,6 @@ public class GameWorld {
 
     private HashMap<Body, Vec2> teleports = new HashMap<>();
     private final boolean triggersEnabled;
-
-    public boolean isEnd = false;
-    public int winnerBall=-1;
 
     public final float worldWidth, worldHeight;
     public final float ballRadius;
@@ -60,26 +60,29 @@ public class GameWorld {
 
         initializeBorders(worldWidth, worldHeight);
 
+        initializeBallsParameters(initialBallPosition, ballsNumber);
+    }
+
+    private void initializeBallsParameters(Vec2 initialBallPosition, int ballsNumber) {
         balls = new ArrayList<>(Arrays.asList(new Body[ballsNumber]));
         forces = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
         velocities = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
         positions = new ArrayList<>(Arrays.asList(new Vec2[ballsNumber]));
         angles = new ArrayList<>(Arrays.asList(new Float[ballsNumber]));
         angularVelocities = new ArrayList<>(Arrays.asList(new Float[ballsNumber]));
+        times = new ArrayList<>(Arrays.asList(new Long[ballsNumber]));
 
-        for(int i=0;i<ballsNumber;i++) {
+        for(int i = 0; i< ballsNumber; i++) {
             balls.set(i, worldUtils.createBall(initialBallPosition));
             forces.set(i, new Vec2(0,0));
             velocities.set(i, new Vec2(0,0));
             positions.set(i, initialBallPosition);
             angles.set(i, 0f);
             angularVelocities.set(i, 0f);
+            times.set(i, (long) -1);
 
             teleports.put(balls.get(i), null);
         }
-
-
-//        mainBall = worldUtils.createBall(initialBallPosition);
     }
 
     @NonNull
@@ -120,7 +123,6 @@ public class GameWorld {
         for(int i=0;i<balls.size();i++) {
             balls.get(i).applyForceToCenter(forces.get(i).mul(balls.get(i).getMass()).mul(0.1f));
         }
-//        mainBall.applyForceToCenter(ballForce.mul(mainBall.getMass()).mul(0.1f));
         world.step(time, velocityIterations, positionIterations);
         loadParams();
     }
@@ -144,7 +146,9 @@ public class GameWorld {
             balls.get(i).setLinearVelocity(u.velocities.get(i));
             balls.get(i).setAngularVelocity(u.angles.get(i));
             balls.get(i).setAngularVelocity(u.angularVelocities.get(i));
+            times.set(i, u.times.get(i));
         }
+        serverStartTime = u.startTime;
     }
 
     public void loadParams(){
@@ -163,7 +167,13 @@ public class GameWorld {
         out.angularVelocities = angularVelocities;
         out.positions = positions;
         out.velocities = velocities;
+        out.times = times;
+        out.startTime = startTime;
         return out;
+    }
+
+    public void startTimers() {
+        serverStartTime = startTime = System.currentTimeMillis();
     }
 
     private class WorldContactListener implements ContactListener {
@@ -177,8 +187,12 @@ public class GameWorld {
                 );
             }
             if(ballTouchedTreasure(contact)) {
-                isEnd = true;
-                winnerBall = balls.indexOf(contact.m_fixtureB.m_body);
+//                isEnd = true;
+//                winnerBall = balls.indexOf(contact.m_fixtureB.m_body);
+                int index = balls.indexOf(contact.m_fixtureB.m_body);
+                if(times.get(index) == -1){
+                    times.set(index, System.currentTimeMillis());
+                }
             }
         }
 

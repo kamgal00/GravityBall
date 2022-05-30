@@ -1,7 +1,5 @@
 package com.example.gravityball.drawing;
 
-import static com.example.gravityball.drawing.ImageUtils.getCroppedBitmap;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,10 +7,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.util.Log;
+import android.text.TextPaint;
 import android.util.Pair;
 
 import com.example.gravityball.R;
@@ -38,13 +34,14 @@ public class GameDrawer {
     private int mainBallRadiusInPixels;
 //    Matrix ballTransposition = new Matrix();
     private final ArrayList<Matrix> ballTranspositions;
+    private int gamePlace = -1;
 
     Bitmap ballBitmap, treasureBitmap, endBitmap, enemyBitmap;
 
     private Paint backgroundPaint;
     private Paint obstaclePaint;
     private Paint wallPaint;
-    private Paint otherPlayersPaint;
+    private Paint endScreenPaint;
 
     public GameDrawer(GameWorld gameWorld, ScaleCalculator scaleCalculator, Resources resources, int players, int playerId) {
         this.gameWorld = gameWorld;
@@ -80,8 +77,8 @@ public class GameDrawer {
         wallPaint = new Paint();
         wallPaint.setColor(Color.rgb(255, 255, 153));
 
-        otherPlayersPaint = new Paint();
-        otherPlayersPaint.setColor(Color.BLUE);
+        endScreenPaint = new Paint();
+        endScreenPaint.setColor(Color.BLUE);
     }
 
     private void prepareStaticObjects(){
@@ -107,18 +104,57 @@ public class GameDrawer {
 
     public void draw(Canvas canvas) {
 
-        canvas.drawColor(backgroundPaint.getColor());
 
-        if(gameWorld.isEnd) {
-            canvas.drawBitmap(endBitmap, null, fullScreenRect, null);
+        if(playerFinished()) {
+            if(gamePlace == -1) {
+                calculateGamePlace();
+            }
+
+            drawEndScreen(canvas);
+
             return;
         }
 
-//        getBallScreenPosition();
+        canvas.drawColor(backgroundPaint.getColor());
 
         drawGameObjects(canvas);
 
         disco.makeDisco(canvas, fullScreenRect);
+
+        drawTime(canvas, System.currentTimeMillis() - gameWorld.startTime);
+    }
+
+    private boolean playerFinished() {
+        return gameWorld.times.get(mainBallId) != -1;
+    }
+
+    private void calculateGamePlace() {
+        gamePlace = 1;
+        for(Long t : gameWorld.times) {
+            if(t!=-1 &&  t < gameWorld.times.get(mainBallId)) gamePlace++;
+        }
+    }
+
+    private void drawEndScreen(Canvas canvas) {
+
+        if(gamePlace == 1) {
+            canvas.drawBitmap(endBitmap, null, fullScreenRect, null);
+        }
+        else {
+            canvas.drawColor(endScreenPaint.getColor());
+            TextPaint p = new TextPaint();
+            p.setTextSize(300);
+
+            p.setTextAlign(Paint.Align.CENTER);
+
+            int xPos = (canvas.getWidth() / 2);
+            int yPos = (int) ((canvas.getHeight() / 2) - ((p.descent() + p.ascent()) / 2)) ;
+
+            canvas.drawText("#"+gamePlace, xPos, yPos, p);
+        }
+
+
+        drawTime(canvas, gameWorld.times.get(mainBallId)-gameWorld.serverStartTime);
     }
 
     public void update(){
@@ -126,14 +162,8 @@ public class GameDrawer {
     }
 
     private void drawGameObjects(Canvas canvas) {
-//        canvas.drawBitmap(ballBitmap, ballTransposition, null);
         for(int i=0;i<ballTranspositions.size();i++) {
             if(i!= mainBallId) {
-//                float[] values = new float[9];
-//                ballTranspositions.get(i).getValues(values);
-//                float x = values[Matrix.MTRANS_X];
-//                float y = values[Matrix.MTRANS_Y];
-//                canvas.drawCircle(x +ballBitmap.getWidth()/2,y+ballBitmap.getHeight()/2, mainBallRadiusInPixels, otherPlayersPaint );
                 canvas.drawBitmap(enemyBitmap, ballTranspositions.get(i), null);
             }
         }
@@ -165,5 +195,24 @@ public class GameDrawer {
     private void calculateBallTransposition(Vec2 position, int id) {
         ballTranspositions.get(id).setRotate(-gameWorld.angles.get(id)/((float)Math.PI*2)*360, ballBitmap.getWidth()/2, ballBitmap.getHeight()/2);
         ballTranspositions.get(id).postTranslate(position.x- mainBallRadiusInPixels, position.y- mainBallRadiusInPixels);
+    }
+
+    private void drawTime(Canvas canvas, long timeInMillis) {
+        long MI = timeInMillis%1000; timeInMillis/=1000;
+        long SS = timeInMillis%60; timeInMillis/=60;
+        long MM = timeInMillis;
+
+        String timeInMMSSMI = String.format("%02d:%02d:%03d", MM, SS, MI);
+
+        TextPaint p = new TextPaint();
+        p.setTextSize(100);
+
+        p.setTextAlign(Paint.Align.CENTER);
+
+        int xPos = (canvas.getWidth() / 2);
+        int yPos = 100;
+
+        canvas.drawText(timeInMMSSMI, xPos, yPos, p);
+
     }
 }

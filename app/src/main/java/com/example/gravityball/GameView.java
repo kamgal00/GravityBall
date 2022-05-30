@@ -82,6 +82,7 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     public void run() {
         long previous = System.currentTimeMillis();
         long lagUpdate = 0;
+        gameWorld.startTimers();
         while (isPlaying) {
             long current = System.currentTimeMillis();
             long elapsed = current - previous;

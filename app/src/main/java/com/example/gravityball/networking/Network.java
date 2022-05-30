@@ -19,6 +19,7 @@ public class Network {
         kryo.register(Vec2.class);
         kryo.register(ArrayList.class);
         kryo.register(Float.class);
+        kryo.register(Long.class);
     }
     public static class EnterLobby{}
     public static class EnterGame{
@@ -28,6 +29,8 @@ public class Network {
     public static class ServerUpdate{
         public ArrayList<Vec2> positions, velocities, forces;
         public ArrayList<Float> angles, angularVelocities;
+        public ArrayList<Long> times;
+        public long startTime;
     }
     public static class ClientUpdate{
         public Vec2 force;
