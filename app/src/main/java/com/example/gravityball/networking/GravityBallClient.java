@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class GravityBallClient {
     Client client;
+
     private static GravityBallClient instance;
 
     private GravityBallClient(){
@@ -28,8 +29,7 @@ public class GravityBallClient {
         client.close();
     }
 
-    public static boolean create() {
-        Log.set(Log.LEVEL_DEBUG);
+    public static synchronized boolean create() {
         if(instance != null) return false;
         instance = new GravityBallClient();
         try{
@@ -42,7 +42,7 @@ public class GravityBallClient {
         return true;
     }
 
-    public static void destroy(){
+    public static synchronized void destroy(){
         if(instance != null) {
             instance.close();
             instance=null;
@@ -52,17 +52,6 @@ public class GravityBallClient {
     public static synchronized boolean isConnected(){
         if(instance == null) return false;
         return instance.client.isConnected();
-    }
-
-    public static synchronized boolean sendMessage(Object message){
-        try{
-            instance.client.sendTCP(message);
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public static void sendUpdate(Network.ClientUpdate update) {

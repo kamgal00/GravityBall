@@ -2,9 +2,7 @@ package com.example.gravityball.ranking;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.EndPoint;
-import com.example.gravityball.drawing.GameDrawer;
-
-import org.jbox2d.common.Vec2;
+import com.example.gravityball.utils.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ public class Network {
 
         @Override
         public String toString() {
-            return levelName+" || "+playerName+" || "+ GameDrawer.millisToString(time);
+            return levelName+" || "+playerName+" || "+ StringUtils.millisToString(time);
         }
     }
 

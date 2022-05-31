@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class RankingServer {
     private static final String FILEPATH = "leaderboard.json";
     public static synchronized Network.Leaderboard getStoredLeaderboard(){
+        Network.Leaderboard out = null;
         try {
             Gson gson = new Gson();
 
@@ -31,20 +32,22 @@ public class RankingServer {
 
             reader.close();
 
-            return leaderboard;
+            out = leaderboard;
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            Network.Leaderboard out = new Network.Leaderboard();
-            out.list = new ArrayList<>();
-            return out;
         }
+
+        if(out == null || out.list == null) {
+            out = new Network.Leaderboard();
+            out.list = new ArrayList<>();
+        }
+
+        return out;
     }
 
     public static synchronized void saveLeaderboard(Network.Leaderboard leaderboard){
         try{
-            System.out.println("SAVELEADERBOARD: "+leaderboard.list);
-
             BufferedWriter writer = new BufferedWriter(new FileWriter(FILEPATH));
             writer.write(new Gson().toJson(leaderboard));
 
@@ -58,27 +61,16 @@ public class RankingServer {
     public static void main(String[] args) {
         Server server = new Server();
         Network.register(server);
+
         server.addListener(new Listener(){
-            @Override
-            public void connected(Connection c){
-                System.out.println("CONNECTED");
-            }
             @Override
             public void received (Connection c, Object object){
                 if(object instanceof Network.ScoreMessage) {
-                    Network.ScoreMessage s = (Network.ScoreMessage) object;
-                    System.out.println("RECEIVED SCORE MESSAGE "+ s.playerName+" "+s.levelName+" "+s.time);
-                    Network.Leaderboard l = getStoredLeaderboard();
-                    if(l == null || l.list == null) {
-                        l = new Network.Leaderboard();
-                        l.list = new ArrayList<>();
-                    }
-                    l.list.add((Network.ScoreMessage) object);
-                    saveLeaderboard(l);
+                    Network.Leaderboard leaderboard = getStoredLeaderboard();
+                    leaderboard.list.add((Network.ScoreMessage) object);
+                    saveLeaderboard(leaderboard);
                 }
                 else if(object instanceof Network.AskForLeaderboard) {
-                    Network.AskForLeaderboard a = (Network.AskForLeaderboard) object;
-                    System.out.println("RECEIVED ASK MESSAGE "+ a.levelName);
                     String levelName = ((Network.AskForLeaderboard) object).levelName;
                     List<Network.ScoreMessage> lsm =
                             getStoredLeaderboard().list.stream()
@@ -90,7 +82,6 @@ public class RankingServer {
                     out.list = new ArrayList<>(lsm);
                     c.sendTCP(out);
                 }
-                System.out.println("END CONNECTION");
                 c.close();
             }
         });
@@ -98,9 +89,9 @@ public class RankingServer {
             server.bind(Network.port, Network.portUDP);
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
         server.start();
-        System.out.println("TEST");
         Log.set(Log.LEVEL_DEBUG);
     }
 }

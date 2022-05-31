@@ -11,7 +11,10 @@ import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.example.gravityball.R;
+import com.example.gravityball.utils.StringUtils;
 import com.example.gravityball.world.GameWorld;
 
 import org.jbox2d.common.Vec2;
@@ -56,8 +59,16 @@ public class GameDrawer {
         prepareStaticObjects();
 
         mainBallId = playerId;
+
+        ballTranspositions = initializeBallTranspositions(players);
+    }
+
+    @NonNull
+    private ArrayList<Matrix> initializeBallTranspositions(int players) {
+        final ArrayList<Matrix> ballTranspositions;
         ballTranspositions =new ArrayList<>(Arrays.asList(new Matrix[players]));
         for(int i=0;i<ballTranspositions.size();i++ ) ballTranspositions.set(i, new Matrix());
+        return ballTranspositions;
     }
 
     private void getBitmaps(Resources resources) {
@@ -158,7 +169,7 @@ public class GameDrawer {
     }
 
     public void update(){
-        getBallScreenPosition();
+        getBallsScreenPositions();
     }
 
     private void drawGameObjects(Canvas canvas) {
@@ -182,7 +193,7 @@ public class GameDrawer {
     }
 
 
-    private void getBallScreenPosition() {
+    private void getBallsScreenPositions() {
         for(int i=0;i<ballTranspositions.size();i++) {
             Vec2 newPosition = new Vec2(gameWorld.positions.get(i));
             if(newPosition.x== Float.POSITIVE_INFINITY || newPosition.x == Float.NEGATIVE_INFINITY)
@@ -197,19 +208,12 @@ public class GameDrawer {
         ballTranspositions.get(id).postTranslate(position.x- mainBallRadiusInPixels, position.y- mainBallRadiusInPixels);
     }
 
-    public static String millisToString(long timeInMillis) {
-        long MI = timeInMillis%1000; timeInMillis/=1000;
-        long SS = timeInMillis%60; timeInMillis/=60;
-        long MM = timeInMillis;
-
-        return String.format("%02d:%02d:%03d", MM, SS, MI);
-    }
-
     private void drawTime(Canvas canvas, long timeInMillis) {
 
-        String timeInMMSSMI = millisToString(timeInMillis);
+        String timeInMMSSMI = StringUtils.millisToString(timeInMillis);
 
         TextPaint p = new TextPaint();
+        p.setColor(Color.WHITE);
         p.setTextSize(100);
 
         p.setTextAlign(Paint.Align.CENTER);

@@ -2,7 +2,7 @@ package com.example.gravityball.state;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Server;
+import com.example.gravityball.SelectLevelActivity;
 import com.example.gravityball.networking.CharacterConnection;
 import com.example.gravityball.networking.GravityBallClient;
 import com.example.gravityball.networking.GravityBallServer;
@@ -49,10 +49,6 @@ public class StateManager extends Listener {
         currentState.disconnected(c);
     }
 
-    public synchronized void action(Object action) {
-        currentState.action(action);
-    }
-
     public synchronized void changeState(GameState newState) {
         if(newState == GameState.MAIN) {
             currentState = GameState.MAIN;
@@ -69,8 +65,8 @@ public class StateManager extends Listener {
     }
 
     private String levelName, playerName;
-    private boolean isHost, isCreatingLobby, isSelectingLeaderboard;
     private int players, playerId;
+    private SelectLevelActivity.SelectLevelGoal selectLevelGoal = SelectLevelActivity.SelectLevelGoal.RUNNING_SINGLE_PLAYER;
 
     public GameState getCurrentState() {
         return currentState;
@@ -82,14 +78,6 @@ public class StateManager extends Listener {
 
     public void setLevelName(String levelName) {
         this.levelName = levelName;
-    }
-
-    public boolean isHost() {
-        return isHost;
-    }
-
-    public void setHost(boolean host) {
-        isHost = host;
     }
 
     public int getPlayers() {
@@ -108,14 +96,6 @@ public class StateManager extends Listener {
         this.playerId = playerId;
     }
 
-    public boolean isCreatingLobby() {
-        return isCreatingLobby;
-    }
-
-    public void setCreatingLobby(boolean creatingLobby) {
-        isCreatingLobby = creatingLobby;
-    }
-
     public String getPlayerName() {
         return playerName;
     }
@@ -124,11 +104,11 @@ public class StateManager extends Listener {
         this.playerName = playerName;
     }
 
-    public boolean isSelectingLeaderboard() {
-        return isSelectingLeaderboard;
+    public SelectLevelActivity.SelectLevelGoal getSelectLevelGoal() {
+        return selectLevelGoal;
     }
 
-    public void setSelectingLeaderboard(boolean selectingLeaderboard) {
-        isSelectingLeaderboard = selectingLeaderboard;
+    public void setSelectLevelGoal(SelectLevelActivity.SelectLevelGoal selectLevelGoal) {
+        this.selectLevelGoal = selectLevelGoal;
     }
 }

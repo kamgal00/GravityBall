@@ -1,6 +1,8 @@
-package com.example.gravityball;
+package com.example.gravityball.utils;
 
 import android.content.res.Resources;
+
+import com.example.gravityball.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +12,9 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class ResourcesUtils {
     private ResourcesUtils(){}
@@ -38,5 +43,20 @@ public class ResourcesUtils {
         }
 
         return writer.toString();
+    }
+
+    public static ArrayList<String> getLevels(){
+        ArrayList<String> out = new ArrayList<>();
+        Pattern levelPattern = Pattern.compile("level[0-9]*");
+
+        Field[] fields= R.raw.class.getFields();
+        for (Field field : fields) {
+            String file = field.getName();
+            if (levelPattern.matcher(file).matches()) {
+                out.add(file);
+            }
+        }
+
+        return out;
     }
 }

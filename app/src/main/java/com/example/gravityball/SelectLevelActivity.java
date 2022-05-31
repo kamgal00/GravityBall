@@ -3,22 +3,21 @@ package com.example.gravityball;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.media.MediaCodec;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.gravityball.state.GameState;
 import com.example.gravityball.state.StateManager;
+import com.example.gravityball.utils.ResourcesUtils;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 public class SelectLevelActivity extends AppCompatActivity {
     ListView lv;
     ArrayList<String> levels;
     ArrayAdapter<String> arrayAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +27,7 @@ public class SelectLevelActivity extends AppCompatActivity {
 
     private void initialize() {
         lv = findViewById(R.id.level_list_view);
-        levels = getLevels();
+        levels = ResourcesUtils.getLevels();
         lv.setOnItemClickListener(
                 (adapterView, view, i, l) -> startGame(levels.get(i))
         );
@@ -41,36 +40,37 @@ public class SelectLevelActivity extends AppCompatActivity {
         lv.setAdapter(arrayAdapter);
     }
 
-    private ArrayList<String> getLevels(){
-        ArrayList<String> out = new ArrayList<>();
-        Pattern levelPattern = Pattern.compile("level[0-9]*");
-
-        Field[] fields=R.raw.class.getFields();
-        for(int count=0; count < fields.length; count++){
-            String file = fields[count].getName();
-            if(levelPattern.matcher(file).matches()) {
-                out.add(file);
-            }
-        }
-
-        return out;
-    }
-
     private void startGame(String name) {
         StateManager.getInstance().setLevelName(name);
-        if(StateManager.getInstance().isCreatingLobby()) {
-            StateManager.getInstance().changeState(GameState.LOBBY_OWNER);
-        }
-        else if(StateManager.getInstance().isSelectingLeaderboard()) {
-            Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
-            startActivity(intent);
-        }
-        else {
-            Intent intent = new Intent(getApplicationContext(), GameActivity.class);
-            StateManager.getInstance().setPlayerId(0);
-            StateManager.getInstance().setPlayers(1);
-            startActivity(intent);
-        }
 
+        StateManager.getInstance().getSelectLevelGoal().onStart(this);
+
+    }
+
+    public enum SelectLevelGoal {
+        CREATING_LOBBY {
+            @Override
+            public void onStart(SelectLevelActivity a) {
+                StateManager.getInstance().changeState(GameState.LOBBY_OWNER);
+            }
+        },
+        SELECTING_LEADERBOARD {
+            @Override
+            public void onStart(SelectLevelActivity a) {
+                Intent intent = new Intent(a.getApplicationContext(), LeaderboardActivity.class);
+                a.startActivity(intent);
+            }
+        },
+        RUNNING_SINGLE_PLAYER{
+            @Override
+            public void onStart(SelectLevelActivity a) {
+                Intent intent = new Intent(a.getApplicationContext(), GameActivity.class);
+                StateManager.getInstance().setPlayerId(0);
+                StateManager.getInstance().setPlayers(1);
+                a.startActivity(intent);
+            }
+        };
+
+        public abstract void onStart(SelectLevelActivity a);
     }
 }

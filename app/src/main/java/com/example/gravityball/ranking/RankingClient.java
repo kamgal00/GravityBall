@@ -33,20 +33,17 @@ public class RankingClient {
     public static Network.Leaderboard getLeaderboardForLevel(String levelName) {
 
         Client client = createClient();
-        Log.e("GET LEADERBOARD: ", "after create");
         if(client == null) {
-            Log.e("GET LEADERBOARD: ", "cant create client");
             return null;
         }
 
         BlockingQueue<Network.Leaderboard> queue = new LinkedBlockingQueue<>();
+
         client.addListener(new Listener.ThreadedListener(new Listener(){
             @Override
             public void received (Connection c, Object object) {
                 if(object instanceof Network.Leaderboard) {
-                    Log.e("GOT OBJECT", ((Network.Leaderboard) object).list.toString());
                     queue.add((Network.Leaderboard) object);
-                    Log.e("ADDED OBJECT", ((Network.Leaderboard) object).list.toString());
                     c.close();
                 }
             }
@@ -58,37 +55,24 @@ public class RankingClient {
 
         Network.Leaderboard received = null;
         try {
-            Log.e("POLL", "before poll");
             received = queue.poll(1, TimeUnit.SECONDS);
 
         } catch (InterruptedException e) {
-            Log.e("GET LEADERBOARD: ", "receive timeout");
             e.printStackTrace();
         }
-        Log.e("POLL", "before poll");
 
         client.close();
-        Log.i("GET LEADERBOARD: ", "received "+received.list);
         return received;
     }
 
     public static void sendScore(Network.ScoreMessage score) {
         Client client = createClient();
         if(client == null) {
-            System.out.println("CLIENT IS NULL");
             return;
         }
 
         client.sendTCP(score);
         client.close();
-    }
-
-    public static void main(String[] args) {
-        Network.ScoreMessage message = new Network.ScoreMessage();
-        message.time = 1;
-        message.levelName="A";
-        message.playerName="B";
-        sendScore(message);
     }
 
 }

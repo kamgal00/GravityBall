@@ -7,7 +7,7 @@ import com.example.gravityball.GameActivity;
 import com.example.gravityball.LobbyActivity;
 import com.example.gravityball.LobbyListActivity;
 import com.example.gravityball.MainActivity;
-import com.example.gravityball.Navigator;
+import com.example.gravityball.utils.Navigator;
 import com.example.gravityball.networking.GravityBallClient;
 import com.example.gravityball.networking.GravityBallServer;
 import com.example.gravityball.networking.Network;
@@ -18,26 +18,6 @@ import java.util.Arrays;
 public enum GameState implements EventHandler{
 
     MAIN{
-        @Override
-        public void connected(Connection c) {
-
-        }
-
-        @Override
-        public void received(Connection c, Object object) {
-
-        }
-
-        @Override
-        public void disconnected(Connection c) {
-
-        }
-
-        @Override
-        public void action(Object action) {
-
-        }
-
         @Override
         public void prepare() {
             GravityBallServer.destroy();
@@ -50,21 +30,6 @@ public enum GameState implements EventHandler{
         @Override
         public void connected(Connection c) {
             StateManager.getInstance().changeState(LOBBY_CLIENT);
-        }
-
-        @Override
-        public void received(Connection c, Object object) {
-
-        }
-
-        @Override
-        public void disconnected(Connection c) {
-
-        }
-
-        @Override
-        public void action(Object action) {
-
         }
 
         @Override
@@ -82,26 +47,6 @@ public enum GameState implements EventHandler{
     },
     LOBBY_OWNER{
         @Override
-        public void connected(Connection c) {
-
-        }
-
-        @Override
-        public void received(Connection c, Object object) {
-
-        }
-
-        @Override
-        public void disconnected(Connection c) {
-
-        }
-
-        @Override
-        public void action(Object action) {
-
-        }
-
-        @Override
         public void prepare() {
             GravityBallClient.destroy();
             if(!GravityBallServer.create()) {
@@ -109,16 +54,10 @@ public enum GameState implements EventHandler{
                 StateManager.getInstance().changeState(MAIN);
                 return;
             }
-            StateManager.getInstance().setHost(true);
             Navigator.returnTo(LobbyActivity.class);
         }
     },
     LOBBY_CLIENT{
-        @Override
-        public void connected(Connection c) {
-
-        }
-
         @Override
         public void received(Connection c, Object object) {
             if(object instanceof Network.EnterGame) {
@@ -136,11 +75,6 @@ public enum GameState implements EventHandler{
         }
 
         @Override
-        public void action(Object action) {
-
-        }
-
-        @Override
         public void prepare() {
             GravityBallServer.destroy();
             if(!GravityBallClient.isConnected()) {
@@ -148,7 +82,6 @@ public enum GameState implements EventHandler{
                 StateManager.getInstance().changeState(MAIN);
                 return;
             }
-            StateManager.getInstance().setHost(false);
             Navigator.returnTo(LobbyActivity.class);
 
         }
@@ -157,21 +90,6 @@ public enum GameState implements EventHandler{
         @Override
         public void connected(Connection c) {
             c.close();
-        }
-
-        @Override
-        public void received(Connection c, Object object) {
-
-        }
-
-        @Override
-        public void disconnected(Connection c) {
-
-        }
-
-        @Override
-        public void action(Object action) {
-
         }
 
         @Override
@@ -190,7 +108,6 @@ public enum GameState implements EventHandler{
             }
             StateManager.getInstance().setPlayers(players);
             StateManager.getInstance().setPlayerId(0);
-            StateManager.getInstance().setHost(true);
             Navigator.returnTo(GameActivity.class);
         }
     },
@@ -201,18 +118,8 @@ public enum GameState implements EventHandler{
         }
 
         @Override
-        public void received(Connection c, Object object) {
-
-        }
-
-        @Override
         public void disconnected(Connection c) {
             StateManager.getInstance().changeState(MAIN);
-        }
-
-        @Override
-        public void action(Object action) {
-
         }
 
         @Override
@@ -223,7 +130,6 @@ public enum GameState implements EventHandler{
                 StateManager.getInstance().changeState(MAIN);
                 return;
             }
-            StateManager.getInstance().setHost(false);
             Navigator.returnTo(GameActivity.class);
         }
     };

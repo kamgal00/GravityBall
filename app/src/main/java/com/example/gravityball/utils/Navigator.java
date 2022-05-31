@@ -1,4 +1,4 @@
-package com.example.gravityball;
+package com.example.gravityball.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,12 +17,6 @@ public class Navigator {
     public static void returnTo(Class<?> activityClass) {
         Intent intent = new Intent(context, activityClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-    }
-
-    public static void runNewActivity(Class<?> activityClass) {
-        Intent intent = new Intent(context, activityClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }

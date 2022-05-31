@@ -169,6 +169,7 @@ public class GameWorld {
         out.velocities = velocities;
         out.times = times;
         out.startTime = startTime;
+        out.sendTime = System.currentTimeMillis();
         return out;
     }
 
@@ -187,8 +188,6 @@ public class GameWorld {
                 );
             }
             if(ballTouchedTreasure(contact)) {
-//                isEnd = true;
-//                winnerBall = balls.indexOf(contact.m_fixtureB.m_body);
                 int index = balls.indexOf(contact.m_fixtureB.m_body);
                 if(times.get(index) == -1){
                     times.set(index, System.currentTimeMillis());

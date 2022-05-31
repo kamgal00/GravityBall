@@ -5,14 +5,12 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 
-import com.example.gravityball.ResourcesUtils;
+import com.example.gravityball.utils.ResourcesUtils;
 
 import org.jbox2d.common.Vec2;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.function.Consumer;
 
 public class GameBuilder {
 

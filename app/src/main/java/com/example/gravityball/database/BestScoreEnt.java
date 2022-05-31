@@ -4,9 +4,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.example.gravityball.drawing.GameDrawer;
-
-import java.io.Serializable;
+import com.example.gravityball.utils.StringUtils;
 
 @Entity
 public class BestScoreEnt {
@@ -21,6 +19,6 @@ public class BestScoreEnt {
 
     @Override
     public String toString(){
-        return levelName+" : "+ GameDrawer.millisToString(time);
+        return levelName+" : "+ StringUtils.millisToString(time);
     }
 }

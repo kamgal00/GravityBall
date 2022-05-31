@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class GravityBallServer {
     final Server server;
 
-    private static String staticName;
     private static GravityBallServer instance;
 
     private GravityBallServer(){
@@ -54,18 +53,6 @@ public class GravityBallServer {
         }
     }
 
-    public static synchronized boolean sendMessage(Object message){
-        if(instance == null) return false;
-        try{
-            instance.server.sendToAllTCP(message);
-            return true;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public static void sendUpdate(Network.ServerUpdate update) {
         try{
             instance.server.sendToAllUDP(update);
@@ -80,11 +67,15 @@ public class GravityBallServer {
     }
 
     public static synchronized int sendGameStart(String levelName){
+
         if(instance == null) return -1;
+
         ArrayList<Connection> connections = new ArrayList<>(Arrays.asList(instance.server.getConnections()));
+
         Network.EnterGame m = new Network.EnterGame();
         m.levelName = levelName;
         m.players = connections.size()+1;
+
         for(int i=0;i<connections.size();i++) {
             m.playerId=i+1;
             ((CharacterConnection) connections.get(i)).id=i+1;

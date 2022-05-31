@@ -34,10 +34,11 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     private final GameWorld gameWorld;
     private final GameDrawer gameDrawer;
     private Canvas canvas;
-    private final GameState gameState;
-    private final int players, playerId;
+    private GameState gameState;
+    private int players, playerId;
     private boolean isSaved = false;
     private final String levelName;
+    private long lastServerUpdateTime=0;
 
     private Thread thread;
     private boolean isPlaying;
@@ -52,9 +53,7 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
 
         this.levelName = levelName;
 
-        gameState = StateManager.getInstance().getCurrentState();
-        players = StateManager.getInstance().getPlayers();
-        playerId = StateManager.getInstance().getPlayerId();
+        loadStateInformation();
 
         gameWorld = loadGameWorld(levelName);
 
@@ -68,6 +67,12 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
 
         gameDrawer = new GameDrawer(gameWorld, scaleCalculator, getResources(), players, playerId);
 
+    }
+
+    private void loadStateInformation() {
+        gameState = StateManager.getInstance().getCurrentState();
+        players = StateManager.getInstance().getPlayers();
+        playerId = StateManager.getInstance().getPlayerId();
     }
 
     @NonNull
@@ -115,17 +120,15 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     }
 
     private void saveScore() {
-        AppDatabase db = AppDatabase.createAppDatabase(getContext());
         long currentTime = gameWorld.times.get(playerId)-gameWorld.serverStartTime;
 
-        com.example.gravityball.ranking.Network.ScoreMessage m = new com.example.gravityball.ranking.Network.ScoreMessage();
-        m.playerName=StateManager.getInstance().getPlayerName();
-        m.levelName=StateManager.getInstance().getLevelName();
-        m.time = currentTime;
-        new Thread(() -> {
-            RankingClient.sendScore(m);
-        }).start();
+        sendScoreToRankingServer(currentTime);
 
+        saveScoreInLocalDatabase(currentTime);
+    }
+
+    private void saveScoreInLocalDatabase(long currentTime) {
+        AppDatabase db = AppDatabase.createAppDatabase(getContext());
         BestScoreEnt lastBest = db.userDao().getById(levelName);
         if(lastBest ==null) {
             lastBest = new BestScoreEnt();
@@ -141,6 +144,16 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         }
     }
 
+    private void sendScoreToRankingServer(long currentTime) {
+        com.example.gravityball.ranking.Network.ScoreMessage m = new com.example.gravityball.ranking.Network.ScoreMessage();
+        m.playerName=StateManager.getInstance().getPlayerName();
+        m.levelName=StateManager.getInstance().getLevelName();
+        m.time = currentTime;
+        new Thread(() -> {
+            RankingClient.sendScore(m);
+        }).start();
+    }
+
     private void update () {
         gameWorld.step(((float)MS_PER_UPDATE)/1000);
         gameDrawer.update();
@@ -154,23 +167,36 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         }
     }
     private void updateControlsAndRemoteChanges(){
-        if(gameState == GameState.GAME_OWNER) {
-            while(!GravityBallServer.messageQueue.isEmpty()){
-                Network.ClientUpdate u = GravityBallServer.messageQueue.poll();
-                if(u == null) continue;
-                gameWorld.forces.set(u.id, u.force);
-            }
+        switch (gameState) {
+            case GAME_OWNER: handleClientsMessages(); break;
+            case GAME_CLIENT: handleServerMessages(); break;
         }
-        if(gameState == GameState.GAME_CLIENT) {
-            while(!GravityBallClient.messageQueue.isEmpty()) {
-                Network.ServerUpdate u = GravityBallClient.messageQueue.poll();
-                if(u == null) continue;
-                gameWorld.forces = u.forces;
-                gameWorld.adjust(u);
-            }
-        }
+        applyGyroscopeForce();
+    }
+
+    private void applyGyroscopeForce() {
         gameWorld.forces.set(playerId, gravity);
     }
+
+    private void handleServerMessages() {
+        while(!GravityBallClient.messageQueue.isEmpty()) {
+            Network.ServerUpdate u = GravityBallClient.messageQueue.poll();
+            if(u == null) continue;
+            if(u.sendTime < lastServerUpdateTime) continue;
+            lastServerUpdateTime = u.sendTime;
+            gameWorld.forces = u.forces;
+            gameWorld.adjust(u);
+        }
+    }
+
+    private void handleClientsMessages() {
+        while(!GravityBallServer.messageQueue.isEmpty()){
+            Network.ClientUpdate u = GravityBallServer.messageQueue.poll();
+            if(u == null) continue;
+            gameWorld.forces.set(u.id, u.force);
+        }
+    }
+
     public void resume () {
         isPlaying = true;
         thread = new Thread(this);
@@ -192,14 +218,23 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        loadSensorDataToVector(sensorEvent);
+
+        if(gameState == GameState.GAME_CLIENT) {
+            sendControlsToHost();
+        }
+    }
+
+    private void sendControlsToHost() {
+        Network.ClientUpdate u = new Network.ClientUpdate();
+        u.force=gravity;
+        GravityBallClient.sendUpdate(u);
+    }
+
+    private void loadSensorDataToVector(SensorEvent sensorEvent) {
         gravity.x =  sensorEvent.values[1];
         gravity.y = -sensorEvent.values[0];
         gravity = gravity.mul(15f);
-        if(gameState == GameState.GAME_CLIENT) {
-            Network.ClientUpdate u = new Network.ClientUpdate();
-            u.force=gravity;
-            GravityBallClient.sendUpdate(u);
-        }
     }
 
     @Override

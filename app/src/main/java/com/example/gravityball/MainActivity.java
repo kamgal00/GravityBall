@@ -4,12 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
 import com.esotericsoftware.minlog.Log;
 import com.example.gravityball.state.GameState;
 import com.example.gravityball.state.StateManager;
+import com.example.gravityball.utils.Navigator;
 
 public class MainActivity extends AppCompatActivity {
     Button single, multi, lobby, scores, global;
@@ -20,39 +20,34 @@ public class MainActivity extends AppCompatActivity {
 
         Navigator.initialize(getApplicationContext());
 
-        single = findViewById(R.id.button);
-        multi = findViewById(R.id.JoinMultiplayer);
-        lobby = findViewById(R.id.CreateLobby);
-        scores = findViewById(R.id.scoresButton);
-        global = findViewById(R.id.global);
+        loadViews();
 
-        single.setOnClickListener(view -> startSingle());
-        multi.setOnClickListener(view -> joinMulti());
-        lobby.setOnClickListener(view -> createLobby());
-        scores.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, BestTimesActivity.class)));
-        global.setOnClickListener(view -> globalRankings());
-
+        setListeners();
 
         Log.set(Log.LEVEL_DEBUG);
 
     }
 
-    private void startSingle() {
-        StateManager.getInstance().setCreatingLobby(false);
-        StateManager.getInstance().setSelectingLeaderboard(false);
-        startActivity(new Intent(MainActivity.this, SelectLevelActivity.class));
+    private void setListeners() {
+        single.setOnClickListener(view -> runSelectLevelWithGoal(SelectLevelActivity.SelectLevelGoal.RUNNING_SINGLE_PLAYER));
+        multi.setOnClickListener(view -> joinMulti());
+        lobby.setOnClickListener(view -> runSelectLevelWithGoal(SelectLevelActivity.SelectLevelGoal.CREATING_LOBBY));
+        scores.setOnClickListener(view -> startActivity(new Intent(MainActivity.this, BestTimesActivity.class)));
+        global.setOnClickListener(view -> runSelectLevelWithGoal(SelectLevelActivity.SelectLevelGoal.SELECTING_LEADERBOARD));
+    }
+
+    private void loadViews() {
+        single = findViewById(R.id.button);
+        multi = findViewById(R.id.JoinMultiplayer);
+        lobby = findViewById(R.id.CreateLobby);
+        scores = findViewById(R.id.scoresButton);
+        global = findViewById(R.id.global);
     }
     private void joinMulti(){
         StateManager.getInstance().changeState(GameState.CHOOSE_LOBBY);
     }
-    private void createLobby(){
-        StateManager.getInstance().setCreatingLobby(true);
-        StateManager.getInstance().setSelectingLeaderboard(false);
-        startActivity(new Intent(MainActivity.this, SelectLevelActivity.class));
-    }
-    private void globalRankings(){
-        StateManager.getInstance().setCreatingLobby(false);
-        StateManager.getInstance().setSelectingLeaderboard(true);
+    private void runSelectLevelWithGoal(SelectLevelActivity.SelectLevelGoal goal) {
+        StateManager.getInstance().setSelectLevelGoal(goal);
         startActivity(new Intent(MainActivity.this, SelectLevelActivity.class));
     }
 }

@@ -30,7 +30,7 @@ public class Network {
         public ArrayList<Vec2> positions, velocities, forces;
         public ArrayList<Float> angles, angularVelocities;
         public ArrayList<Long> times;
-        public long startTime;
+        public long startTime, sendTime;
     }
     public static class ClientUpdate{
         public Vec2 force;

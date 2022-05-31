@@ -54,9 +54,7 @@ public class LobbyListActivity extends AppCompatActivity {
 
     private void refresh(){
         List<InetAddress> addresses = GravityBallClient.getHosts();
-//        Log.i("FOUND HOSTS: ", addresses.toString());
         hosts = addresses.stream().map(InetAddress::getHostAddress).collect(Collectors.toList());
-        System.out.println(hosts);
         adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_spinner_dropdown_item,
