@@ -44,4 +44,13 @@
         app:layout_constraintEnd_toEndOf="@+id/CreateLobby"
         app:layout_constraintStart_toStartOf="@+id/CreateLobby"
         app:layout_constraintTop_toBottomOf="@+id/CreateLobby" />
+
+    <Button
+        android:id="@+id/global"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GLOBAL RANKINGS"
+        app:layout_constraintEnd_toEndOf="@+id/scoresButton"
+        app:layout_constraintStart_toStartOf="@+id/scoresButton"
+        app:layout_constraintTop_toBottomOf="@+id/scoresButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>

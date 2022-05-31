@@ -68,8 +68,8 @@ public class StateManager extends Listener {
         currentState.prepare();
     }
 
-    private String levelName;
-    private boolean isHost, isCreatingLobby;
+    private String levelName, playerName;
+    private boolean isHost, isCreatingLobby, isSelectingLeaderboard;
     private int players, playerId;
 
     public GameState getCurrentState() {
@@ -114,5 +114,21 @@ public class StateManager extends Listener {
 
     public void setCreatingLobby(boolean creatingLobby) {
         isCreatingLobby = creatingLobby;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
+    public boolean isSelectingLeaderboard() {
+        return isSelectingLeaderboard;
+    }
+
+    public void setSelectingLeaderboard(boolean selectingLeaderboard) {
+        isSelectingLeaderboard = selectingLeaderboard;
     }
 }

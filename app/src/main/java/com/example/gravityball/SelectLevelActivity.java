@@ -61,6 +61,10 @@ public class SelectLevelActivity extends AppCompatActivity {
         if(StateManager.getInstance().isCreatingLobby()) {
             StateManager.getInstance().changeState(GameState.LOBBY_OWNER);
         }
+        else if(StateManager.getInstance().isSelectingLeaderboard()) {
+            Intent intent = new Intent(getApplicationContext(), LeaderboardActivity.class);
+            startActivity(intent);
+        }
         else {
             Intent intent = new Intent(getApplicationContext(), GameActivity.class);
             StateManager.getInstance().setPlayerId(0);

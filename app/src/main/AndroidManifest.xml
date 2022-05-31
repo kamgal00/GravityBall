@@ -12,6 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GravityBall">
         <activity
+            android:name=".ChooseNameActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LeaderboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".BestTimesActivity"
             android:exported="false" />
         <activity
@@ -30,13 +43,8 @@
             android:screenOrientation="landscape" />
         <activity
             android:name=".MainActivity"
-            android:exported="true"
+            android:exported="false"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

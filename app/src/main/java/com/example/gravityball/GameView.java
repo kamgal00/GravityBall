@@ -20,6 +20,7 @@ import com.example.gravityball.drawing.ScaleCalculator;
 import com.example.gravityball.networking.GravityBallClient;
 import com.example.gravityball.networking.GravityBallServer;
 import com.example.gravityball.networking.Network;
+import com.example.gravityball.ranking.RankingClient;
 import com.example.gravityball.state.GameState;
 import com.example.gravityball.state.StateManager;
 import com.example.gravityball.world.GameBuilder;
@@ -116,6 +117,14 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
     private void saveScore() {
         AppDatabase db = AppDatabase.createAppDatabase(getContext());
         long currentTime = gameWorld.times.get(playerId)-gameWorld.serverStartTime;
+
+        com.example.gravityball.ranking.Network.ScoreMessage m = new com.example.gravityball.ranking.Network.ScoreMessage();
+        m.playerName=StateManager.getInstance().getPlayerName();
+        m.levelName=StateManager.getInstance().getLevelName();
+        m.time = currentTime;
+        new Thread(() -> {
+            RankingClient.sendScore(m);
+        }).start();
 
         BestScoreEnt lastBest = db.userDao().getById(levelName);
         if(lastBest ==null) {
