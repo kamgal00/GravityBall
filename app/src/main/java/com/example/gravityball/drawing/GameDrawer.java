@@ -25,17 +25,15 @@ import java.util.Arrays;
 public class GameDrawer {
     public final GameWorld gameWorld;
     public final ScaleCalculator scaleCalculator;
-    Disco disco = new Disco();
+    final Disco disco = new Disco();
 
     private ArrayList<Rect> walls = new ArrayList<>();
     private ArrayList<Rect> obstacles = new ArrayList<>();
     Rect treasurePos;
-    Rect fullScreenRect;
+    final Rect fullScreenRect;
 
-//    private Vec2 mainBallPosition;
     private final int mainBallId;
     private int mainBallRadiusInPixels;
-//    Matrix ballTransposition = new Matrix();
     private final ArrayList<Matrix> ballTranspositions;
     private int gamePlace = -1;
 

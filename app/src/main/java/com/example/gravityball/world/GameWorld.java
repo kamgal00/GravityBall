@@ -9,13 +9,8 @@ import com.example.gravityball.networking.Network;
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
-import org.jbox2d.collision.shapes.CircleShape;
-import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 
@@ -40,7 +35,7 @@ public class GameWorld {
     public Pair<Vec2, Vec2> treasurePosition;
     public final HashMap<Body, Vec2> obstaclesToTeleports = new HashMap<>();
 
-    private HashMap<Body, Vec2> teleports = new HashMap<>();
+    private final HashMap<Body, Vec2>  teleports = new HashMap<>();
     private final boolean triggersEnabled;
 
     public final float worldWidth, worldHeight;

@@ -1,9 +1,6 @@
 package com.example.gravityball.networking;
 
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.Server;
-import com.esotericsoftware.minlog.Log;
 import com.example.gravityball.state.StateManager;
 
 import java.io.IOException;
@@ -13,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class GravityBallClient {
-    Client client;
+    final Client client;
 
     private static GravityBallClient instance;
 
@@ -49,9 +46,9 @@ public class GravityBallClient {
         }
     }
 
-    public static synchronized boolean isConnected(){
-        if(instance == null) return false;
-        return instance.client.isConnected();
+    public static synchronized boolean isNotConnected(){
+        if(instance == null) return true;
+        return !instance.client.isConnected();
     }
 
     public static void sendUpdate(Network.ClientUpdate update) {
@@ -78,6 +75,6 @@ public class GravityBallClient {
         }
     }
 
-    public static ConcurrentLinkedQueue<Network.ServerUpdate> messageQueue = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Network.ServerUpdate> messageQueue = new ConcurrentLinkedQueue<>();
 
 }

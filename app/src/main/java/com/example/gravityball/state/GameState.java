@@ -77,7 +77,7 @@ public enum GameState implements EventHandler{
         @Override
         public void prepare() {
             GravityBallServer.destroy();
-            if(!GravityBallClient.isConnected()) {
+            if(GravityBallClient.isNotConnected()) {
                 Log.e("LOBBY_CLIENT", "user is not connected");
                 StateManager.getInstance().changeState(MAIN);
                 return;
@@ -125,7 +125,7 @@ public enum GameState implements EventHandler{
         @Override
         public void prepare() {
             GravityBallServer.destroy();
-            if(!GravityBallClient.isConnected()) {
+            if(GravityBallClient.isNotConnected()) {
                 Log.e("GAME_CLIENT", "client is not connected");
                 StateManager.getInstance().changeState(MAIN);
                 return;

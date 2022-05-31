@@ -7,7 +7,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.gravityball.database.AppDatabase;
-import com.example.gravityball.database.BestScoreDao;
 import com.example.gravityball.database.BestScoreEnt;
 
 import java.util.List;

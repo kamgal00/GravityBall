@@ -33,7 +33,7 @@ public class GameBuilder {
                 worldHeight = obj.getDouble("worldHeight"),
                 ballRadius = obj.getDouble("ballRadius");
         Vec2 ballPosition = loadVec2(obj.getJSONArray("ballPosition"));
-        GameWorld gameWorld = new GameWorld(
+        return new GameWorld(
                 (float) ballRadius,
                 ballPosition,
                 (float) worldWidth,
@@ -41,7 +41,6 @@ public class GameBuilder {
                 ballsNumber,
                 triggers
         );
-        return gameWorld;
     }
 
     private static void loadObjects(JSONObject obj, GameWorld gameWorld) throws JSONException {

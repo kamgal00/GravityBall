@@ -2,20 +2,15 @@ package com.example.gravityball;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.esotericsoftware.minlog.Log;
 import com.example.gravityball.state.GameState;
 import com.example.gravityball.state.StateManager;
-
-import java.util.List;
 
 public class LobbyActivity extends AppCompatActivity {
     Button start;

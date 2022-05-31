@@ -1,9 +1,6 @@
 package com.example.gravityball;
 
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-
 import android.graphics.Canvas;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -149,9 +146,7 @@ public class GameView extends SurfaceView implements Runnable, SensorEventListen
         m.playerName=StateManager.getInstance().getPlayerName();
         m.levelName=StateManager.getInstance().getLevelName();
         m.time = currentTime;
-        new Thread(() -> {
-            RankingClient.sendScore(m);
-        }).start();
+        new Thread(() -> RankingClient.sendScore(m)).start();
     }
 
     private void update () {

@@ -11,11 +11,13 @@ import java.util.Vector;
 public class Disco {
     private long previous = System.currentTimeMillis();
     private long lag = 0;
-    private long MS_PER_CHANGE = 500;
+    private final long MS_PER_CHANGE = 500;
 
-    int turn = 8, counter = 0;
-    Paint blue = new Paint(), red = new Paint(), yellow = new Paint(), green = new Paint();
-    Vector<Paint> colors = new Vector<>();
+    final Paint blue = new Paint();
+    final Paint red = new Paint();
+    final Paint yellow = new Paint();
+    final Paint green = new Paint();
+    final Vector<Paint> colors = new Vector<>();
     Paint currPaint = blue;
     Paint prevPaint;
 

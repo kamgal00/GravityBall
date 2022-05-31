@@ -3,19 +3,14 @@ package com.example.gravityball;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.os.StrictMode;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.example.gravityball.networking.GravityBallClient;
 import com.example.gravityball.ranking.Network;
 import com.example.gravityball.ranking.RankingClient;
 import com.example.gravityball.state.StateManager;
 
-import java.net.InetAddress;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class LeaderboardActivity extends AppCompatActivity {
 
